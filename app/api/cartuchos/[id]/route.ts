@@ -1,38 +1,48 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 
-export async function PATCH(
-  request: Request,
-  { params }: { params: Promise<{ id: string }> }
-) {
+export async function GET() {
   try {
-    const { id } = await params;
+    const cartuchos = await prisma.cartucho.findMany({
+      orderBy: { id: "desc" },
+    });
+    return NextResponse.json(cartuchos);
+  } catch {
+    return NextResponse.json(
+      { error: "Erro ao buscar cartuchos no banco de dados." },
+      { status: 500 }
+    );
+  }
+}
+
+export async function POST(request: Request) {
+  try {
     const body = await request.json();
-    const { status, numeroBoletim, urlBoletim, dataUso } = body;
+    const { numeroSerie, modelo, alcance, subunidade, observacao, validade } = body;
 
-    const cartuchoId = Number(id);
-
-    if (isNaN(cartuchoId)) {
+    if (!numeroSerie) {
       return NextResponse.json(
-        { error: "ID inválido." },
+        { error: "O número de série é obrigatório." },
         { status: 400 }
       );
     }
 
-    const cartuchoAtualizado = await prisma.cartucho.update({
-      where: { id: cartuchoId },
+    const novoCartucho = await prisma.cartucho.create({
       data: {
-        status,
-        numeroBoletim: status === "Utilizado" ? numeroBoletim : null,
-        urlBoletim: status === "Utilizado" ? urlBoletim : null,
-        dataUso: status === "Utilizado" ? (dataUso ? new Date(dataUso) : new Date()) : null,
+        numeroSerie: numeroSerie.toUpperCase().trim(),
+        modelo: modelo || "OPERACIONAL 25FT",
+        alcance: alcance || "13,72 Metros (25ft)",
+        subunidade: subunidade || "Reserva de Armas / 17º BPM",
+        observacao: observacao || null,
+        validade: validade ? new Date(validade) : null,
+        status: "Disponível",
       },
     });
 
-    return NextResponse.json(cartuchoAtualizado);
+    return NextResponse.json(novoCartucho, { status: 201 });
   } catch {
     return NextResponse.json(
-      { error: "Erro ao atualizar registro do cartucho no banco de dados." },
+      { error: "Erro ao cadastrar cartucho no banco de dados." },
       { status: 500 }
     );
   }
