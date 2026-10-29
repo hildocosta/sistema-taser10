@@ -1,34 +1,32 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Inter } from "next/font/google";
 import "./globals.css";
+import Sidebar from "@/components/Sidebar";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-});
+const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "SGF 17º BPM — Gestão de Tasers e Cartuchos",
-  description: "Sistema de Controle de Armamento de Menor Potencial Ofensivo",
+  title: "17º BPM — Gestão de Tasers e Cartuchos",
+  description: "Sistema de Gestão de Armamento de Menor Potencial Ofensivo",
 };
 
 export default function RootLayout({
   children,
-}: {
+}: Readonly<{
   children: React.ReactNode;
-}) {
+}>) {
   return (
-    <html
-      lang="pt-BR"
-      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
-    >
-      <body className="min-h-full flex flex-col bg-slate-50 text-slate-900 font-sans selection:bg-blue-100 selection:text-blue-900">
-        {children}
+    <html lang="pt-BR">
+      <body className={`${inter.className} bg-[#F8FAFC] text-slate-800 antialiased`}>
+        <div className="flex min-h-screen lg:h-screen w-full overflow-x-hidden font-sans antialiased">
+          {/* Sidebar Global (Com suporte a drawer móvel) */}
+          <Sidebar />
+
+          {/* Área Principal com adaptação de padding superior para o botão de menu mobile */}
+          <main className="flex-1 flex flex-col min-w-0 overflow-y-auto lg:overflow-hidden pt-14 lg:pt-0">
+            {children}
+          </main>
+        </div>
       </body>
     </html>
   );
